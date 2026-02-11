@@ -15,7 +15,7 @@ A C++ middleware tool for generating dynamic and random game worlds via procedur
 - **CMakeLists:** Instructions on how to compile the project
 
 ## Getting Started
-1. Clone the repo: 
+1. Clone the repo: https://github.com/itsnonu/worldgen.git
 2. Create build folder: WIP
 3. Run CMake: WIP 
 4. Build: WIP
