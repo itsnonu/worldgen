@@ -2,10 +2,11 @@
 A C++ middleware tool for generating dynamic and random game worlds via procedural algorithms.
 
 ## Tech Stack
-- **Language:** C++20
+- **Language:** C++17
 - **Build System:** CMake
-- **Language:** FastNoise2
-- **Language:** Dear ImGui
+- **Noise Generation:** FastNoise2
+- **GUI Framework:** Dear ImGui
+- **Visualization:** stb_image_write
 
 ## Folder Structure
 - **src:** .cpp Logic Location

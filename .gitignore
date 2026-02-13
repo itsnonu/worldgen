@@ -58,6 +58,14 @@ CMakeUserPresets.json
 !.vscode/launch.json
 !.vscode/extensions.json
 !.vscode/*.code-snippets
+*.user
+*.suo
+.vs/
+
+#Build output
+build/
+Debug/
+Release/
 
 # Local History for Visual Studio Code
 .history/
