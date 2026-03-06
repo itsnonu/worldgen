@@ -18,7 +18,7 @@ int main() {
     if (!glfwInit()) return -1;
     
     // Create the main application window
-    GLFWwindow* window = glfwCreateWindow(1280, 720, "WorldGen - Senior Capstone", NULL, NULL);
+    GLFWwindow* window = glfwCreateWindow(1280, 720, "WorldGen", NULL, NULL);
     if (!window) { 
         glfwTerminate(); 
         return -1; 
