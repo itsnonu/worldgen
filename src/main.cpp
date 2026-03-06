@@ -3,7 +3,7 @@
 #include <FastNoise/FastNoise.h>
 
 #define STB_IMAGE_WRITE_IMPLEMENTATION
-#include "stb_image_write.h"
+#include "C:\Users\Zayjin\source\repos\worldgen\lib"
 
 int main() {
 	std::cout << "WorldGen Starting..." << std::endl;
