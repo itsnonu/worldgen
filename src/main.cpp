@@ -3,7 +3,7 @@
 #include <FastNoise/FastNoise.h>
 
 #define STB_IMAGE_WRITE_IMPLEMENTATION
-#include "stb_image_write.h"
+#include "../lib/stb_image_write.h"
 
 int main() {
 	std::cout << "WorldGen Starting..." << std::endl;
@@ -15,10 +15,19 @@ int main() {
 	std::cout << "Generating " << width << "x" << height << " heightmap..." << std::endl;
 
 	// Create a FastNoise node - Using Simplex noise type
-	auto fnSimplex = FastNoise::New<FastNoise::Simplex>();
+	auto simplex = FastNoise::New<FastNoise::Simplex>();
+
+	// CHANGE: wrapped Simplex in FractalFBm
+	// plain Simplex looked too smooth, so FBm adds multiple layers of noise
+	// to make the heightmap look more like terrain
+	auto fnSimplex = FastNoise::New<FastNoise::FractalFBm>();
+	fnSimplex->SetSource(simplex);
+	fnSimplex->SetOctaveCount(5);
 
 	// Check if the node was created successfully
-	if (!fnSimplex) {
+	// CHANGE: also checking 'simplex'
+	// if either noise node fails to initialize, the program should stop
+	if (!simplex || !fnSimplex) {
 		std::cerr << "Failed to create FastNoise node." << std::endl;
 		return 1;
 	}
@@ -28,13 +37,15 @@ int main() {
 
 	std::cout << "Generating noise..." << std::endl;
 
-	std::cout << "Generating noise..." << std::endl;
-
 	// Generate noise using the correct API
 	std::vector<float> noiseOutput(width * height);
 
 	// GenUniformGrid2D parameters: output, xStart, yStart, xSize, ySize, frequency
-	fnSimplex->GenUniformGrid2D(noiseOutput.data(), 0.0f, 0.0f, width, height, 0.02f, 0.02f, 1337);
+
+	// CHANGE: using bigger step values (4.0f, 4.0f) instead of tiny values
+	//  tiny steps were sampling too small an area of the noise field,
+	// which created a smooth gradient instead of visible terrain variation
+	fnSimplex->GenUniformGrid2D(noiseOutput.data(), 0, 0, width, height, 4.0f, 4.0f, 1337);
 
 	// Copy the 1D noise output into our 2D heightmap array
 	std::cout << "Organizing heightmap data..." << std::endl;
@@ -78,15 +89,26 @@ int main() {
 
 	std::vector<unsigned char> pixels(width * height);
 
+	// CHANGE: moved range calculation outside the loops
+	// the range stays constant, so there is no need to recalculate it
+	// for every single pixel
+	float range = maxVal - minVal;
+	if (range == 0.0f) range = 1.0f;
+
 	for (int y = 0; y < height; y++) {
 		for (int x = 0; x < width; x++) {
 			float noise = heightmap[y][x];
 
 			// Normalize to 0-1 range based on actual min/max
-			float normalized = (noise - minVal) / (maxVal - minVal);
+			float normalized = (noise - minVal) / range;
+
+			// CHANGE: clamped normalized values
+			// bc it protects against values going slightly outside 0-1
+			if (normalized < 0.0f) normalized = 0.0f;
+			if (normalized > 1.0f) normalized = 1.0f;
 
 			// Convert to 0-255 pixel value
-			unsigned char pixel = (unsigned char)(normalized * 255.0f);
+			unsigned char pixel = static_cast<unsigned char>(normalized * 255.0f);
 
 			// Store in 1D pixel array
 			pixels[y * width + x] = pixel;
@@ -100,7 +122,10 @@ int main() {
 
 	if (result) {
 		std::cout << "Success! Heightmap saved as 'heightmap.png'" << std::endl;
-		std::cout << "Location: build/Debug/heightmap.png" << std::endl;
+
+		// CHANGE: corrected displayed save location
+		// the file is saved to the current working directory, not build/Debug
+		std::cout << "Location: heightmap.png" << std::endl;
 	}
 	else {
 		std::cout << "ERROR: Failed to save image!" << std::endl;
@@ -110,5 +135,4 @@ int main() {
 	std::cin.get();
 
 	return 0;
-
 }
