@@ -3,7 +3,7 @@
 #include <FastNoise/FastNoise.h>
 
 #define STB_IMAGE_WRITE_IMPLEMENTATION
-#include "C:\Users\Zayjin\source\repos\worldgen\lib"
+#include "stb_image_write.h"
 
 int main() {
 	std::cout << "WorldGen Starting..." << std::endl;
@@ -110,4 +110,5 @@ int main() {
 	std::cin.get();
 
 	return 0;
+
 }
