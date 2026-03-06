@@ -12,6 +12,7 @@ add_subdirectory(lib/FastNoise2)
 
 # Locate FastNoise2 headers and include them in the project
 include_directories(${CMAKE_SOURCE_DIR}lib/FastNoise2/include)
+include_directories(${CMAKE_SOURCE_DIR}lib)
 
 # Create executable from main.cpp and link it with the FastNoise2 library
 add_executable(WorldGen src/main.cpp)
