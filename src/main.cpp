@@ -228,7 +228,10 @@ int main() {
                 ImGui::SliderInt("Octaves", &octaves, 1, 10);
                 ImGui::Spacing(); ImGui::Spacing();
                 
-                ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1,1,1,1));
+                // Push Dark Navy background and White text
+                ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.07f, 0.10f, 0.16f, 1.0f));
+                ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.15f, 0.20f, 0.30f, 1.0f));
+                ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 1.0f, 1.0f, 1.0f));
                 if (ImGui::Button("Generate World", ImVec2(-1, 40))) {
                     std::cout << "Generating noise with Seed: " << seed << "..." << std::endl;
 
@@ -261,7 +264,7 @@ int main() {
                         }
                     }
                 }
-                ImGui::PopStyleColor();
+                ImGui::PopStyleColor(3);
                 ImGui::EndChild();
 
                 ImGui::SameLine();
