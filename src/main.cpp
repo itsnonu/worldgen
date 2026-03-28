@@ -199,8 +199,11 @@ int main() {
             // NEW MAP
             // ==========================================
             case AppState::NewMap: {
-                ImGui::Text("New Map");
-                ImGui::SameLine(ImGui::GetWindowWidth() - 100);
+            ImGui::Text("New Map");
+                
+                // Dynamically calculate the button width + padding so it never crops
+                float backBtnWidth = ImGui::CalcTextSize("Main Menu").x + (ImGui::GetStyle().FramePadding.x * 2.0f);
+                ImGui::SameLine(ImGui::GetWindowWidth() - backBtnWidth - 20.0f); // 20px padding from right edge
                 
                 ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0,0,0,0)); 
                 if (ImGui::Button("Main Menu")) currentState = AppState::MainMenu;
@@ -333,21 +336,30 @@ int main() {
                 ImGui::Separator();
 
                 if (previewTab == 0) {
-                    ImGui::BeginChild("GridArea", ImVec2(0, -50), true);
-                    ImGui::Text("< MAP PREVIEW GOES HERE >");
-                    ImGui::EndChild();
-                    
-                    ImGui::SetCursorPosX(ImGui::GetWindowWidth() - 220);
-                    ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.9f, 0.9f, 0.9f, 1.0f));
-                    if (ImGui::Button("Regenerate", ImVec2(100, 30))) { /* regen */ }
-                    ImGui::PopStyleColor();
-                    ImGui::SameLine();
-                    // Push Dark Navy background and White text
-                    ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.07f, 0.10f, 0.16f, 1.0f));
-                    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.15f, 0.20f, 0.30f, 1.0f));
-                    ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 1.0f, 1.0f, 1.0f));
-                    if (ImGui::Button("Save Map", ImVec2(100, 30))) { /* save */ }
-                    ImGui::PopStyleColor(3);
+                ImGui::BeginChild("GridArea", ImVec2(0, -50), true);
+                ImGui::Text("< MAP PREVIEW GOES HERE >");
+                ImGui::EndChild();
+                
+                // Dynamically right-align the two bottom buttons
+                float btnWidth1 = 120.0f; // Made slightly wider for the new font
+                float btnWidth2 = 120.0f;
+                float spacing = ImGui::GetStyle().ItemSpacing.x;
+                float totalBtnsWidth = btnWidth1 + btnWidth2 + spacing;
+                
+                ImGui::SetCursorPosX(ImGui::GetContentRegionAvail().x - totalBtnsWidth);
+                
+                ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.9f, 0.9f, 0.9f, 1.0f));
+                if (ImGui::Button("Regenerate", ImVec2(btnWidth1, 30))) { /* regen */ }
+                ImGui::PopStyleColor();
+                
+                ImGui::SameLine();
+                
+                // Push Dark Navy background and White text
+                ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.07f, 0.10f, 0.16f, 1.0f));
+                ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.15f, 0.20f, 0.30f, 1.0f));
+                ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 1.0f, 1.0f, 1.0f));
+                if (ImGui::Button("Save Map", ImVec2(btnWidth2, 30))) { /* save */ }
+                ImGui::PopStyleColor(3);
                 } else {
                     ImGui::BeginChild("Toolbox", ImVec2(150, 0), false);
                     ImGui::Text("Toolbox");
