@@ -76,6 +76,11 @@ int main() {
     // 2. Setup Dear ImGui context
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
+    ImGuiIO& io = ImGui::GetIO(); (void)io;
+    ImFont* mainFont = io.Fonts->AddFontFromFileTTF("../src/assets/Macondo-Regular.ttf", 22.0f); // font and size
+    if (mainFont == NULL) {
+    std::cout << "Warning: Could not load custom font. Using default." << std::endl;
+    }
     SetupModernStyle();
     ImGui_ImplGlfw_InitForOpenGL(window, true);
     ImGui_ImplOpenGL3_Init("#version 130");
@@ -153,7 +158,9 @@ int main() {
                 ImGui::Spacing(); ImGui::Spacing();
 
                 ImGui::SetCursorPosX(16);
+                ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 1.0f, 1.0f, 1.0f));
                 if (ImGui::Button("New Map", ImVec2(buttonWidth, 40))) currentState = AppState::NewMap;
+                ImGui::PopStyleColor();
                 
                 ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.95f, 0.96f, 0.97f, 1.0f));
                 ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.07f, 0.10f, 0.16f, 1.0f));
