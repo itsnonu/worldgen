@@ -143,13 +143,15 @@ int main() {
                 ImGui::Text("WorldGen");
                 ImGui::Spacing(); ImGui::Spacing(); ImGui::Spacing();
 
-                float cardWidth = 400.0f;
-                float cardHeight = 350.0f;
+                // Calculate card size based on screen width
+                float cardWidth = display_w * 0.6f; // Make the card take up 60% of the screen width
+                if (cardWidth < 450.0f) cardWidth = 450.0f; // But never let it get smaller than 450px
+                float cardHeight = 450.0f; // Increased height to fit the new, larger font
+
                 ImGui::SetCursorPosX((windowWidth - cardWidth) * 0.5f);
-                
                 ImGui::BeginChild("MenuCard", ImVec2(cardWidth, cardHeight), true);
-                
-                float buttonWidth = cardWidth - 32.0f; 
+
+                float buttonWidth = cardWidth - 32.0f; // Keep the 16px padding on both sides
                 ImGui::SetCursorPos(ImVec2(16, 20));
                 
                 textWidth = ImGui::CalcTextSize("Main Menu").x;
