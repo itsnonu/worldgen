@@ -81,7 +81,10 @@ int main() {
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
     ImGuiIO& io = ImGui::GetIO(); (void)io;
-    ImFont* mainFont = io.Fonts->AddFontFromFileTTF("../src/assets/Macondo-Regular.ttf", 22.0f); // font and size
+    ImFontConfig fontConfig;
+    // Shift the text UP by 3 pixels
+    fontConfig.GlyphOffset.y = -3.0f;
+    ImFont* mainFont = io.Fonts->AddFontFromFileTTF("../src/assets/Macondo-Regular.ttf", 22.0f, &fontConfig); // font and size
     if (mainFont == NULL) {
     std::cout << "Warning: Could not load custom font. Using default." << std::endl;
     }
