@@ -271,10 +271,64 @@ int main() {
 
                 // --- Right Column (Preview/Edit Area) ---
                 ImGui::BeginChild("PreviewArea", ImVec2(0, 0), false);
-                
-                if (ImGui::Button(previewTab == 0 ? "** Preview **" : "Preview")) previewTab = 0;
+
+                // --- Segmented Toggle Switch (Preview/Edit) ---
+
+                // 1. Style the pill container (Light grey background, rounded edges, slight inner padding)
+                ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(0.92f, 0.93f, 0.95f, 1.0f)); 
+                ImGui::PushStyleVar(ImGuiStyleVar_ChildRounding, 8.0f);
+                ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(4, 4)); 
+
+                // We make a tiny child window to act as the grey background "track"
+                ImGui::BeginChild("ToggleContainer", ImVec2(200, 38), ImGuiChildFlags_AlwaysUseWindowPadding, 0);
+                // Style the buttons inside the track
+                ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(2, 0)); // Tiny gap between the two options
+                ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 6.0f);       // Round the inner active "switch"
+
+                // Calculate button width dynamically so they perfectly fill the container
+                float btnWidth = (ImGui::GetContentRegionAvail().x - 2.0f) * 0.5f;
+
+                // --- PREVIEW TOGGLE ---
+                bool isPreview = (previewTab == 0);
+                if (isPreview) {
+                    // Active: Solid white block, dark navy text
+                    ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1.0f, 1.0f, 1.0f, 1.0f));
+                    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(1.0f, 1.0f, 1.0f, 1.0f));
+                    ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.07f, 0.10f, 0.16f, 1.0f));
+                } else {
+                    // Inactive: Totally transparent background, faded text
+                    ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.0f, 0.0f, 0.0f, 0.0f));
+                    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.85f, 0.88f, 0.92f, 1.0f)); // Slight hover effect
+                    ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.5f, 0.55f, 0.6f, 1.0f));
+                }
+
+                if (ImGui::Button("Preview", ImVec2(btnWidth, 30))) previewTab = 0;
+                ImGui::PopStyleColor(3);
+
                 ImGui::SameLine();
-                if (ImGui::Button(previewTab == 1 ? "** Edit **" : "Edit")) previewTab = 1;
+
+                // --- EDIT TOGGLE ---
+                bool isEdit = (previewTab == 1);
+                if (isEdit) {
+                    // Active: Solid white block, dark navy text
+                    ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1.0f, 1.0f, 1.0f, 1.0f));
+                    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(1.0f, 1.0f, 1.0f, 1.0f));
+                    ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.07f, 0.10f, 0.16f, 1.0f));
+                } else {
+                    // Inactive: Totally transparent background, faded text
+                    ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.0f, 0.0f, 0.0f, 0.0f));
+                    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.85f, 0.88f, 0.92f, 1.0f)); // Slight hover effect
+                    ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.5f, 0.55f, 0.6f, 1.0f));
+                }
+
+                if (ImGui::Button("Edit", ImVec2(btnWidth, 30))) previewTab = 1;
+                ImGui::PopStyleColor(3);
+
+                // Clean up styles
+                ImGui::PopStyleVar(2); // Button styling
+                ImGui::EndChild();     // End toggle container
+                ImGui::PopStyleVar(2); // Container styling
+                ImGui::PopStyleColor(); // Container background color
 
                 ImGui::Separator();
 
