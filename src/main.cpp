@@ -288,9 +288,12 @@ int main() {
                     if (ImGui::Button("Regenerate", ImVec2(100, 30))) { /* regen */ }
                     ImGui::PopStyleColor();
                     ImGui::SameLine();
-                    ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1,1,1,1));
+                    // Push Dark Navy background and White text
+                    ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.07f, 0.10f, 0.16f, 1.0f));
+                    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.15f, 0.20f, 0.30f, 1.0f));
+                    ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 1.0f, 1.0f, 1.0f));
                     if (ImGui::Button("Save Map", ImVec2(100, 30))) { /* save */ }
-                    ImGui::PopStyleColor();
+                    ImGui::PopStyleColor(3);
                 } else {
                     ImGui::BeginChild("Toolbox", ImVec2(150, 0), false);
                     ImGui::Text("Toolbox");
