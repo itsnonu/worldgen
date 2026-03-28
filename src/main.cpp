@@ -392,24 +392,52 @@ int main() {
             // ==========================================
             case AppState::LoadMap: {
                 ImGui::Text("Load Map");
-                ImGui::SameLine(ImGui::GetWindowWidth() - 100);
+                
+                // Dynamically right-align the Main Menu button
+                float backBtnWidth = ImGui::CalcTextSize("Main Menu").x + (ImGui::GetStyle().FramePadding.x * 2.0f);
+                ImGui::SameLine(ImGui::GetWindowWidth() - backBtnWidth - 20.0f);
+                
                 ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0,0,0,0));
                 if (ImGui::Button("Main Menu")) currentState = AppState::MainMenu;
                 ImGui::PopStyleColor();
+                ImGui::Spacing();
                 
+                // The main white card
                 ImGui::BeginChild("LoadMapCard", ImVec2(0, 0), true);
+                
+                // --- Left Column (Upload Controls) ---
+                ImGui::BeginChild("UploadSection", ImVec2(400, 0), false);
                 ImGui::Text("Upload a saved map file");
                 ImGui::Spacing();
                 
+                ImGui::SetNextItemWidth(250.0f);
                 ImGui::InputText("##filepath", (char*)"No file chosen", 256, ImGuiInputTextFlags_ReadOnly);
                 ImGui::SameLine();
-                ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1,1,1,1));
-                if (ImGui::Button("Browse", ImVec2(100, 30))) { /* Open File Dialog */ }
-                ImGui::PopStyleColor();
+                
+                // Dark Navy Browse Button
+                ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.07f, 0.10f, 0.16f, 1.0f));
+                ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.15f, 0.20f, 0.30f, 1.0f));
+                ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 1.0f, 1.0f, 1.0f));
+                if (ImGui::Button("Browse", ImVec2(100, 0))) { /* Open File Dialog */ }
+                ImGui::PopStyleColor(3);
+                
+                ImGui::EndChild(); // End UploadSection
+                
+                ImGui::SameLine();
+                
+                // --- Right Column (Preview Box) ---
+                ImGui::BeginChild("PreviewSection", ImVec2(0, 0), true); // true = draw border
+                
+                // Math to perfectly center text inside this box
+                const char* prevText = "Loaded map preview (placeholder)";
+                ImVec2 textSize = ImGui::CalcTextSize(prevText);
+                ImVec2 avail = ImGui::GetContentRegionAvail();
+                ImGui::SetCursorPos(ImVec2((avail.x - textSize.x) * 0.5f, (avail.y - textSize.y) * 0.5f));
+                
+                ImGui::TextColored(ImVec4(0.6f, 0.6f, 0.6f, 1.0f), prevText);
+                ImGui::EndChild(); // End PreviewSection
 
-                ImGui::SetCursorPos(ImVec2(ImGui::GetWindowWidth() * 0.5f - 100, 150));
-                ImGui::TextColored(ImVec4(0.6f, 0.6f, 0.6f, 1.0f), "Loaded map preview (placeholder)");
-                ImGui::EndChild();
+                ImGui::EndChild(); // End LoadMapCard
                 break;
             }
 
