@@ -101,6 +101,7 @@ int main() {
     int worldTypeItem = 0;
     const char* worldTypes[] = { "Desert", "Forest", "Mountain", "Alien" };
     int previewTab = 0; // 0 = Preview, 1 = Edit
+    int themeTab = 0; // 0 = Light, 1 = Dark
 
     // FastNoise Generation Variables
     static int width = 256;
@@ -446,26 +447,67 @@ int main() {
             // ==========================================
             case AppState::Settings: {
                 ImGui::Text("Settings");
-                ImGui::SameLine(ImGui::GetWindowWidth() - 100);
+                
+                // Dynamically right-align the Main Menu button
+                float backBtnWidth = ImGui::CalcTextSize("Main Menu").x + (ImGui::GetStyle().FramePadding.x * 2.0f);
+                ImGui::SameLine(ImGui::GetWindowWidth() - backBtnWidth - 20.0f);
+                
                 ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0,0,0,0));
                 if (ImGui::Button("Main Menu")) currentState = AppState::MainMenu;
                 ImGui::PopStyleColor();
+                ImGui::Spacing();
 
                 ImGui::BeginChild("SettingsCard", ImVec2(0, 0), true);
                 ImGui::Text("Theme");
                 ImGui::Spacing();
                 
-                ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1,1,1,1));
-                ImGui::Button("Light", ImVec2(80, 40));
-                ImGui::PopStyleColor();
+                // --- Segmented Toggle Switch (Light/Dark) ---
+                ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(0.92f, 0.93f, 0.95f, 1.0f)); 
+                ImGui::PushStyleVar(ImGuiStyleVar_ChildRounding, 8.0f);
+                ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(4, 4)); 
+
+                ImGui::BeginChild("ThemeToggleContainer", ImVec2(200, 38), ImGuiChildFlags_AlwaysUseWindowPadding, 0);
+                ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(2, 0)); 
+                ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 6.0f);       
+
+                float btnWidth = (ImGui::GetContentRegionAvail().x - 2.0f) * 0.5f;
+
+                // --- LIGHT TOGGLE ---
+                bool isLight = (themeTab == 0);
+                if (isLight) {
+                    ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1.0f, 1.0f, 1.0f, 1.0f));
+                    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(1.0f, 1.0f, 1.0f, 1.0f));
+                    ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.07f, 0.10f, 0.16f, 1.0f));
+                } else {
+                    ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.0f, 0.0f, 0.0f, 0.0f));
+                    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.85f, 0.88f, 0.92f, 1.0f)); 
+                    ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.5f, 0.55f, 0.6f, 1.0f));
+                }
+                if (ImGui::Button("Light", ImVec2(btnWidth, 30))) themeTab = 0;
+                ImGui::PopStyleColor(3);
+
                 ImGui::SameLine();
+
+                // --- DARK TOGGLE ---
+                bool isDark = (themeTab == 1);
+                if (isDark) {
+                    ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1.0f, 1.0f, 1.0f, 1.0f));
+                    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(1.0f, 1.0f, 1.0f, 1.0f));
+                    ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.07f, 0.10f, 0.16f, 1.0f));
+                } else {
+                    ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.0f, 0.0f, 0.0f, 0.0f));
+                    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.85f, 0.88f, 0.92f, 1.0f)); 
+                    ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.5f, 0.55f, 0.6f, 1.0f));
+                }
+                if (ImGui::Button("Dark", ImVec2(btnWidth, 30))) themeTab = 1;
+                ImGui::PopStyleColor(3);
+
+                ImGui::PopStyleVar(2); 
+                ImGui::EndChild();     
+                ImGui::PopStyleVar(2); 
+                ImGui::PopStyleColor(); 
                 
-                ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1,1,1,1)); 
-                ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0,0,0,1));
-                if (ImGui::Button("Dark", ImVec2(80, 40))) { /* Dark mode logic */ }
-                ImGui::PopStyleColor(2);
-                
-                ImGui::EndChild();
+                ImGui::EndChild(); // End SettingsCard
                 break;
             }
         }
