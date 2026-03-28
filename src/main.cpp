@@ -25,36 +25,40 @@ enum class AppState {
 void SetupModernStyle() {
     ImGuiStyle& style = ImGui::GetStyle();
     
-    // Rounding for that modern, soft look
     style.WindowRounding = 8.0f;
     style.ChildRounding = 8.0f;
     style.FrameRounding = 6.0f;
     style.PopupRounding = 6.0f;
     
-    // Spacing
     style.ItemSpacing = ImVec2(8, 12);
     style.FramePadding = ImVec2(16, 8);
 
     ImVec4* colors = style.Colors;
     
     // Backgrounds
-    colors[ImGuiCol_WindowBg]       = ImVec4(0.96f, 0.94f, 0.92f, 1.0f); // Cream background
-    colors[ImGuiCol_ChildBg]        = ImVec4(1.00f, 1.00f, 1.00f, 1.00f); // White cards
+    colors[ImGuiCol_WindowBg]       = ImVec4(0.96f, 0.94f, 0.92f, 1.0f); // Cream
+    colors[ImGuiCol_ChildBg]        = ImVec4(1.00f, 1.00f, 1.00f, 1.00f); // White
+    colors[ImGuiCol_PopupBg]        = ImVec4(1.00f, 1.00f, 1.00f, 1.00f); // White dropdowns
     
     // Text
-    colors[ImGuiCol_Text]           = ImVec4(0.07f, 0.10f, 0.16f, 1.0f); // Dark Navy/Black text
+    colors[ImGuiCol_Text]           = ImVec4(0.07f, 0.10f, 0.16f, 1.0f); // Dark Navy
     
-    // Frames (Dropdowns, inputs)
+    // Frames (Inputs, Combo boxes)
     colors[ImGuiCol_FrameBg]        = ImVec4(0.95f, 0.96f, 0.97f, 1.0f); // Light grey
     colors[ImGuiCol_FrameBgHovered] = ImVec4(0.90f, 0.91f, 0.92f, 1.0f);
     colors[ImGuiCol_FrameBgActive]  = ImVec4(0.85f, 0.86f, 0.88f, 1.0f);
     
-    // Buttons (Default to the Dark Navy from your mockup)
-    colors[ImGuiCol_Button]         = ImVec4(0.07f, 0.10f, 0.16f, 1.0f); 
-    colors[ImGuiCol_ButtonHovered]  = ImVec4(0.15f, 0.20f, 0.30f, 1.0f);
-    colors[ImGuiCol_ButtonActive]   = ImVec4(0.04f, 0.06f, 0.10f, 1.0f);
+    // Global Buttons (Now Light Grey so the tiny arrows are visible!)
+    colors[ImGuiCol_Button]         = ImVec4(0.90f, 0.91f, 0.92f, 1.0f); 
+    colors[ImGuiCol_ButtonHovered]  = ImVec4(0.85f, 0.86f, 0.88f, 1.0f);
+    colors[ImGuiCol_ButtonActive]   = ImVec4(0.80f, 0.81f, 0.83f, 1.0f);
     
-    // Checkmarks and Sliders
+    // Dropdown Item Highlighting (Headers)
+    colors[ImGuiCol_Header]         = ImVec4(0.90f, 0.91f, 0.92f, 1.0f);
+    colors[ImGuiCol_HeaderHovered]  = ImVec4(0.85f, 0.86f, 0.88f, 1.0f);
+    colors[ImGuiCol_HeaderActive]   = ImVec4(0.80f, 0.81f, 0.83f, 1.0f);
+    
+    // Misc
     colors[ImGuiCol_CheckMark]      = ImVec4(0.07f, 0.10f, 0.16f, 1.0f);
     colors[ImGuiCol_SliderGrab]     = ImVec4(0.07f, 0.10f, 0.16f, 1.0f);
     colors[ImGuiCol_SliderGrabActive]= ImVec4(0.15f, 0.20f, 0.30f, 1.0f);
@@ -160,9 +164,14 @@ int main() {
                 ImGui::Spacing(); ImGui::Spacing();
 
                 ImGui::SetCursorPosX(16);
+                // Push Dark Navy background and White text
+                ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.07f, 0.10f, 0.16f, 1.0f));
+                ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.15f, 0.20f, 0.30f, 1.0f));
                 ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 1.0f, 1.0f, 1.0f));
+
                 if (ImGui::Button("New Map", ImVec2(buttonWidth, 40))) currentState = AppState::NewMap;
-                ImGui::PopStyleColor();
+
+                ImGui::PopStyleColor(3);
                 
                 ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.95f, 0.96f, 0.97f, 1.0f));
                 ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.07f, 0.10f, 0.16f, 1.0f));
