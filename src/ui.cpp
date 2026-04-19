@@ -86,15 +86,32 @@ void SetupModernStyle() {
 
 // Dark theme - applied when user clicks Dark in Settings
 void SetupDarkStyle() {
-    ImGui::StyleColorsDark(); // Built-in ImGui dark theme as the base
-
     ImGuiStyle& style = ImGui::GetStyle();
+    ImVec4* colors = style.Colors;
+
+    // Backgrounds
+    colors[ImGuiCol_WindowBg]   = ImVec4(0.07f, 0.09f, 0.12f, 1.00f); // Deep Navy header
+    colors[ImGuiCol_ChildBg]    = ImVec4(0.11f, 0.14f, 0.19f, 1.00f); // Dark Slate cards
+    colors[ImGuiCol_PopupBg]    = ImVec4(0.11f, 0.14f, 0.19f, 1.00f);
+
+    // Text - Crucial for visibility
+    colors[ImGuiCol_Text]       = ImVec4(0.95f, 0.96f, 0.98f, 1.00f); // Off-white text
+
+    // Frames (Inputs, Sliders)
+    colors[ImGuiCol_FrameBg]    = ImVec4(0.16f, 0.20f, 0.28f, 1.00f);
+    colors[ImGuiCol_FrameBgHovered] = ImVec4(0.24f, 0.28f, 0.38f, 1.00f);
+    colors[ImGuiCol_FrameBgActive]  = ImVec4(0.28f, 0.33f, 0.44f, 1.00f);
+
+    // Buttons
+    colors[ImGuiCol_Button]         = ImVec4(0.20f, 0.25f, 0.33f, 1.00f);
+    colors[ImGuiCol_ButtonHovered]  = ImVec4(0.28f, 0.35f, 0.45f, 1.00f);
+    colors[ImGuiCol_ButtonActive]   = ImVec4(0.15f, 0.20f, 0.28f, 1.00f);
+
+    // Maintain your custom layout properties
     style.WindowRounding = 8.0f;
     style.ChildRounding = 8.0f;
     style.FrameRounding = 6.0f;
     style.PopupRounding = 6.0f;
-    style.ItemSpacing = ImVec2(8, 12);
-    style.FramePadding = ImVec2(16, 8);
 }
 
 // ============================================================
@@ -182,6 +199,9 @@ int RunUI() {
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
 
+        if (themeTab == 0) SetupModernStyle();
+        else SetupDarkStyle();
+
         int display_w, display_h;
         glfwGetWindowSize(window, &display_w, &display_h);
 
@@ -262,9 +282,14 @@ int RunUI() {
             float backBtnWidth = ImGui::CalcTextSize("Main Menu").x + (ImGui::GetStyle().FramePadding.x * 2.0f);
             ImGui::SameLine(ImGui::GetWindowWidth() - backBtnWidth - 20.0f);
 
-            ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0, 0, 0, 0));
+            // Set text color: Dark Navy for Light Mode, White for Dark Mode
+            ImVec4 btnTextColor = (themeTab == 0) ? ImVec4(0.07f, 0.10f, 0.16f, 1.0f) : ImVec4(1.0f, 1.0f, 1.0f, 1.0f);
+            ImGui::PushStyleColor(ImGuiCol_Text, btnTextColor);
+            ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0, 0, 0, 0)); // Transparent background
+
             if (ImGui::Button("Main Menu")) currentState = AppState::MainMenu;
-            ImGui::PopStyleColor();
+
+            ImGui::PopStyleColor(2);
             ImGui::Spacing();
 
             ImGui::BeginChild("NewMapCard", ImVec2(0, 0), true);
@@ -317,7 +342,9 @@ int RunUI() {
             ImGui::BeginChild("PreviewArea", ImVec2(0, 0), false);
 
             // --- Segmented Toggle Switch (Preview/Edit) ---
-            ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(0.92f, 0.93f, 0.95f, 1.0f));
+            // Choose a light-grey track for light mode, or a dark-slate track for dark mode
+            ImVec4 trackColor = (themeTab == 0) ? ImVec4(0.92f, 0.93f, 0.95f, 1.0f) : ImVec4(0.16f, 0.20f, 0.28f, 1.0f);
+            ImGui::PushStyleColor(ImGuiCol_ChildBg, trackColor);
             ImGui::PushStyleVar(ImGuiStyleVar_ChildRounding, 8.0f);
             ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(4, 4));
 
@@ -402,21 +429,27 @@ int RunUI() {
                 float totalBtnsWidth = btnWidth1 + btnWidth2 + spacing;
                 ImGui::SetCursorPosX(ImGui::GetContentRegionAvail().x - totalBtnsWidth);
 
-                ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.9f, 0.9f, 0.9f, 1.0f));
-                // CHANGED: Regenerate now calls the same runGeneration() lambda as Generate World
+               // Dynamically style the Regenerate button based on the theme
+                // Light mode: Light grey | Dark mode: Dark slate/navy
+                ImVec4 regenBg = (themeTab == 0) ? ImVec4(0.9f, 0.9f, 0.9f, 1.0f) : ImVec4(0.20f, 0.25f, 0.33f, 1.0f);
+                ImVec4 regenHover = (themeTab == 0) ? ImVec4(0.8f, 0.8f, 0.8f, 1.0f) : ImVec4(0.28f, 0.35f, 0.45f, 1.00f);
+
+                ImGui::PushStyleColor(ImGuiCol_Button, regenBg);
+                ImGui::PushStyleColor(ImGuiCol_ButtonHovered, regenHover);
+
                 if (ImGui::Button("Regenerate", ImVec2(btnWidth1, 30))) {
-                    runGeneration();
+                    runGeneration(); // Calls the backend lambda
                 }
-                ImGui::PopStyleColor();
+                ImGui::PopStyleColor(2);
 
                 ImGui::SameLine();
 
+                // Save Map button remains dark navy with white text for high contrast
                 ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.07f, 0.10f, 0.16f, 1.0f));
                 ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.15f, 0.20f, 0.30f, 1.0f));
                 ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 1.0f, 1.0f, 1.0f));
-                if (ImGui::Button("Save Map", ImVec2(btnWidth2, 30))) { /* save */ }
+                if (ImGui::Button("Save Map", ImVec2(btnWidth2, 30))) { /* save logic */ }
                 ImGui::PopStyleColor(3);
-
             }
             else {
                 // --- Edit Tab ---
