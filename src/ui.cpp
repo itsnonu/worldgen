@@ -245,8 +245,10 @@ int RunUI() {
             ImGui::Spacing(); ImGui::Spacing();
 
             ImGui::SetCursorPosX(16);
-            ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.07f, 0.10f, 0.16f, 1.0f));
-            ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.15f, 0.20f, 0.30f, 1.0f));
+            ImVec4 newMapColor = (themeTab == 0) ? ImVec4(0.07f, 0.10f, 0.16f, 1.0f) : ImVec4(0.40f, 0.50f, 0.70f, 1.00f);
+            ImVec4 newMapHover = (themeTab == 0) ? ImVec4(0.15f, 0.20f, 0.30f, 1.0f) : ImVec4(0.50f, 0.60f, 0.85f, 1.00f);
+            ImGui::PushStyleColor(ImGuiCol_Button, newMapColor);
+            ImGui::PushStyleColor(ImGuiCol_ButtonHovered, newMapHover);
             ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 1.0f, 1.0f, 1.0f));
             if (ImGui::Button("New Map", ImVec2(buttonWidth, 40))) currentState = AppState::NewMap;
             ImGui::PopStyleColor(3);
