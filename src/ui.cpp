@@ -338,143 +338,96 @@ int RunUI() {
 
             ImGui::SameLine();
 
-            // --- Right Column (Preview/Edit Area) ---
+            // --- Right Column (Preview) ---
             ImGui::BeginChild("PreviewArea", ImVec2(0, 0), false);
 
-            // --- Segmented Toggle Switch (Preview/Edit) ---
-            // Choose a light-grey track for light mode, or a dark-slate track for dark mode
+            // --- Segmented Toggle Switch (Preview Only) ---
             ImVec4 trackColor = (themeTab == 0) ? ImVec4(0.92f, 0.93f, 0.95f, 1.0f) : ImVec4(0.16f, 0.20f, 0.28f, 1.0f);
             ImGui::PushStyleColor(ImGuiCol_ChildBg, trackColor);
             ImGui::PushStyleVar(ImGuiStyleVar_ChildRounding, 8.0f);
             ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(4, 4));
 
-            ImGui::BeginChild("ToggleContainer", ImVec2(200, 38), ImGuiChildFlags_AlwaysUseWindowPadding, 0);
-            ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(2, 0));
+            ImGui::BeginChild("ToggleContainer", ImVec2(120, 38), ImGuiChildFlags_AlwaysUseWindowPadding, 0); 
             ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 6.0f);
 
-            float btnWidth = (ImGui::GetContentRegionAvail().x - 2.0f) * 0.5f;
+            float btnWidth = ImGui::GetContentRegionAvail().x; 
 
-            // Preview toggle
-            bool isPreview = (previewTab == 0);
-            if (isPreview) {
-                ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1.0f, 1.0f, 1.0f, 1.0f));
-                ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(1.0f, 1.0f, 1.0f, 1.0f));
-                ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.07f, 0.10f, 0.16f, 1.0f));
-            }
-            else {
-                ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.0f, 0.0f, 0.0f, 0.0f));
-                ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.85f, 0.88f, 0.92f, 1.0f));
-                ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.5f, 0.55f, 0.6f, 1.0f));
-            }
-            if (ImGui::Button("Preview", ImVec2(btnWidth, 30))) previewTab = 0;
+            // Active Style
+            ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1.0f, 1.0f, 1.0f, 1.0f));
+            ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(1.0f, 1.0f, 1.0f, 1.0f));
+            ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.07f, 0.10f, 0.16f, 1.0f));
+
+            ImGui::Button("Preview", ImVec2(btnWidth, 30)); 
+
             ImGui::PopStyleColor(3);
-
-            ImGui::SameLine();
-
-            // Edit toggle
-            bool isEdit = (previewTab == 1);
-            if (isEdit) {
-                ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1.0f, 1.0f, 1.0f, 1.0f));
-                ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(1.0f, 1.0f, 1.0f, 1.0f));
-                ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.07f, 0.10f, 0.16f, 1.0f));
-            }
-            else {
-                ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.0f, 0.0f, 0.0f, 0.0f));
-                ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.85f, 0.88f, 0.92f, 1.0f));
-                ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.5f, 0.55f, 0.6f, 1.0f));
-            }
-            if (ImGui::Button("Edit", ImVec2(btnWidth, 30))) previewTab = 1;
-            ImGui::PopStyleColor(3);
-
-            ImGui::PopStyleVar(2);
+            ImGui::PopStyleVar(1);
             ImGui::EndChild();
             ImGui::PopStyleVar(2);
             ImGui::PopStyleColor();
 
             ImGui::Separator();
 
-            if (previewTab == 0) {
-                // --- Preview Tab ---
-                ImGui::BeginChild("GridArea", ImVec2(0, -50), true);
+            // --- Preview Tab ---
+            ImGui::BeginChild("GridArea", ImVec2(0, -50), true);
 
-                // CHANGED: was just static text, now shows the generated texture
-                ImVec2 avail = ImGui::GetContentRegionAvail();
-                if (mapGenerated && previewTexture) {
-                    // Scale image to fit while keeping it square
-                    float imgSize = std::min(avail.x, avail.y);
-                    ImGui::SetCursorPos(ImVec2(
-                        (avail.x - imgSize) * 0.5f,
-                        (avail.y - imgSize) * 0.5f
-                    ));
-                    ImGui::Image((ImTextureID)(intptr_t)previewTexture, ImVec2(imgSize, imgSize));
-                }
-                else {
-                    // Placeholder until first generation
-                    // OLD: ImGui::Text("< MAP PREVIEW GOES HERE >");
-                    const char* msg = "Press Generate World to preview";
-                    ImVec2 ts = ImGui::CalcTextSize(msg);
-                    ImGui::SetCursorPos(ImVec2(
-                        (avail.x - ts.x) * 0.5f,
-                        (avail.y - ts.y) * 0.5f
-                    ));
-                    ImGui::TextColored(ImVec4(0.5f, 0.5f, 0.5f, 1.0f), msg);
-                }
-
-                ImGui::EndChild(); // End GridArea
-
-                // Bottom buttons (Regenerate + Save Map)
-                float btnWidth1 = 120.0f;
-                float btnWidth2 = 120.0f;
-                float spacing = ImGui::GetStyle().ItemSpacing.x;
-                float totalBtnsWidth = btnWidth1 + btnWidth2 + spacing;
-                ImGui::SetCursorPosX(ImGui::GetContentRegionAvail().x - totalBtnsWidth);
-
-               // Dynamically style the Regenerate button based on the theme
-                // Light mode: Light grey | Dark mode: Dark slate/navy
-                ImVec4 regenBg = (themeTab == 0) ? ImVec4(0.9f, 0.9f, 0.9f, 1.0f) : ImVec4(0.20f, 0.25f, 0.33f, 1.0f);
-                ImVec4 regenHover = (themeTab == 0) ? ImVec4(0.8f, 0.8f, 0.8f, 1.0f) : ImVec4(0.28f, 0.35f, 0.45f, 1.00f);
-
-                ImGui::PushStyleColor(ImGuiCol_Button, regenBg);
-                ImGui::PushStyleColor(ImGuiCol_ButtonHovered, regenHover);
-
-                if (ImGui::Button("Regenerate", ImVec2(btnWidth1, 30))) {
-                    runGeneration(); // Calls the backend lambda
-                }
-                ImGui::PopStyleColor(2);
-
-                ImGui::SameLine();
-
-                // Save Map button remains dark navy with white text for high contrast
-                ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.07f, 0.10f, 0.16f, 1.0f));
-                ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.15f, 0.20f, 0.30f, 1.0f));
-                ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 1.0f, 1.0f, 1.0f));
-                if (ImGui::Button("Save Map", ImVec2(btnWidth2, 30))) { /* save logic */ }
-                ImGui::PopStyleColor(3);
+            // CHANGED: was just static text, now shows the generated texture
+            ImVec2 avail = ImGui::GetContentRegionAvail();
+            if (mapGenerated && previewTexture) {
+                // Scale image to fit while keeping it square
+                float imgSize = std::min(avail.x, avail.y);
+                ImGui::SetCursorPos(ImVec2(
+                    (avail.x - imgSize) * 0.5f,
+                    (avail.y - imgSize) * 0.5f
+                ));
+                ImGui::Image((ImTextureID)(intptr_t)previewTexture, ImVec2(imgSize, imgSize));
             }
             else {
-                // --- Edit Tab ---
-                ImGui::BeginChild("Toolbox", ImVec2(150, 0), false);
-                ImGui::Text("Toolbox");
-                ImGui::Button("Select", ImVec2(-1, 30));
-                ImGui::Button("Draw", ImVec2(-1, 30));
-                ImGui::Button("Place Object", ImVec2(-1, 30));
-                ImGui::Spacing();
-                ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1, 1, 1, 1));
-                ImGui::Button("Save Map", ImVec2(-1, 40));
-                ImGui::PopStyleColor();
-                ImGui::EndChild();
+                // Placeholder until first generation
+                // OLD: ImGui::Text("< MAP PREVIEW GOES HERE >");
+                const char* msg = "Press Generate World to preview";
+                ImVec2 ts = ImGui::CalcTextSize(msg);
+                ImGui::SetCursorPos(ImVec2(
+                    (avail.x - ts.x) * 0.5f,
+                    (avail.y - ts.y) * 0.5f
+                ));
+                ImGui::TextColored(ImVec4(0.5f, 0.5f, 0.5f, 1.0f), msg);
+            }
 
-                ImGui::SameLine();
+            ImGui::EndChild(); // End GridArea
 
-                ImGui::BeginChild("EditGridArea", ImVec2(0, 0), true);
-                ImGui::Text("Editing surface...");
-                ImGui::EndChild();
+            // Bottom buttons (Regenerate + Save Map)
+            float btnWidth1 = 120.0f;
+            float btnWidth2 = 120.0f;
+            float spacing = ImGui::GetStyle().ItemSpacing.x;
+            float totalBtnsWidth = btnWidth1 + btnWidth2 + spacing;
+            ImGui::SetCursorPosX(ImGui::GetContentRegionAvail().x - totalBtnsWidth);
+
+            // Dynamically style the Regenerate button based on the theme
+            // Light mode: Light grey | Dark mode: Dark slate/navy
+            ImVec4 regenBg = (themeTab == 0) ? ImVec4(0.9f, 0.9f, 0.9f, 1.0f) : ImVec4(0.20f, 0.25f, 0.33f, 1.0f);
+            ImVec4 regenHover = (themeTab == 0) ? ImVec4(0.8f, 0.8f, 0.8f, 1.0f) : ImVec4(0.28f, 0.35f, 0.45f, 1.00f);
+
+            ImGui::PushStyleColor(ImGuiCol_Button, regenBg);
+            ImGui::PushStyleColor(ImGuiCol_ButtonHovered, regenHover);
+
+            if (ImGui::Button("Regenerate", ImVec2(btnWidth1, 30))) {
+                runGeneration(); // Calls the backend lambda
+            }
+            ImGui::PopStyleColor(2);
+
+            ImGui::SameLine();
+
+            // Save Map button remains dark navy with white text for high contrast
+            ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.07f, 0.10f, 0.16f, 1.0f));
+            ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.15f, 0.20f, 0.30f, 1.0f));
+            ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 1.0f, 1.0f, 1.0f));
+            if (ImGui::Button("Save Map", ImVec2(btnWidth2, 30))) { /* save logic */ }
+            ImGui::PopStyleColor(3);
             }
 
             ImGui::EndChild(); // End PreviewArea
             ImGui::EndChild(); // End NewMapCard
             break;
-        }
 
                              // ==========================================
                              // LOAD MAP
