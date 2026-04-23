@@ -107,6 +107,11 @@ void SetupDarkStyle() {
     colors[ImGuiCol_ButtonHovered]  = ImVec4(0.28f, 0.35f, 0.45f, 1.00f);
     colors[ImGuiCol_ButtonActive]   = ImVec4(0.15f, 0.20f, 0.28f, 1.00f);
 
+    // Dropdown Highlighting (Selected Items in Combo boxes such as world size and type)
+    colors[ImGuiCol_Header]         = ImVec4(0.24f, 0.28f, 0.38f, 1.00f); // Slate-blue highlight
+    colors[ImGuiCol_HeaderHovered]  = ImVec4(0.28f, 0.35f, 0.45f, 1.00f);
+    colors[ImGuiCol_HeaderActive]   = ImVec4(0.20f, 0.25f, 0.33f, 1.00f);
+
     // Maintain your custom layout properties
     style.WindowRounding = 8.0f;
     style.ChildRounding = 8.0f;
