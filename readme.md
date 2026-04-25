@@ -19,9 +19,9 @@ A C++ middleware tool for generating dynamic and random game worlds via procedur
 - Visual Studio with the Desktop development with C++ workload, or MinGW-w64
 - OpenGL
 
-## Getting Started
+# Getting Started
 1. Clone the repo:
-- https://github.com/itsnonu/worldgen.git
+- `https://github.com/itsnonu/worldgen.git`
 2. Open CMake GUI
 3. Set your Source and Build paths:
 - Locate the repo
@@ -34,3 +34,16 @@ A C++ middleware tool for generating dynamic and random game worlds via procedur
 - Click Open Project to open it in Visual Studio
 7. Run
 - Set the "WorldGen.exe" as "set as default startup"
+
+### Alternatively (using commands)
+1. Clone the repo:
+- `https://github.com/itsnonu/worldgen.git`
+2. Open your terminal window within your project
+3. Inside the root project folder create a build folder
+- ```mkdir build```
+4. Once created, navigate into the folder
+- `cd build`
+5. Once inside you can compile using cmake
+- `cmake --build .`
+6. Once compiled you can execute the program
+- `.\Debug\WorldGen.exe`
