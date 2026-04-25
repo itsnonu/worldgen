@@ -1,6 +1,13 @@
+#define NOMINMAX
 #include <iostream>
 #include <vector>
 #include <algorithm> // for std::min/max
+
+// File access
+#ifdef _WIN32
+    #include <windows.h>
+    #include <commdlg.h>
+#endif
 
 // UI and Graphics Headers
 #include "imgui.h"
@@ -23,6 +30,36 @@ enum class AppState {
     LoadMap,
     Settings
 };
+
+std::string OpenFileDialog() {
+    char filename[1024] = { 0 };
+#ifdef _WIN32
+    // Windows Native Dialog
+    OPENFILENAMEA ofn;
+    ZeroMemory(&ofn, sizeof(ofn));
+    ofn.lStructSize = sizeof(ofn);
+    ofn.hwndOwner = NULL;
+    ofn.lpstrFile = filename;
+    ofn.nMaxFile = sizeof(filename);
+    ofn.lpstrFilter = "Image Files\0*.png;*.jpg;*.jpeg\0All Files\0*.*\0";
+    ofn.nFilterIndex = 1;
+    ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST | OFN_NOCHANGEDIR;
+    if (GetOpenFileNameA(&ofn)) return std::string(filename);
+#elif __APPLE__
+    // Mac AppleScript Dialog
+    FILE* pipe = popen("osascript -e 'POSIX path of (choose file of type {\"public.png\", \"public.jpeg\"})' 2>/dev/null", "r");
+    if (pipe) {
+        if (fgets(filename, sizeof(filename), pipe)) {
+            std::string path = filename;
+            path.erase(std::remove(path.begin(), path.end(), '\n'), path.end()); // Clean newline
+            pclose(pipe);
+            return path;
+        }
+        pclose(pipe);
+    }
+#endif
+    return "";
+}
 
 // Loads a saved PNG from disk into a GPU texture so ImGui can display it
 // Returns the OpenGL texture ID, or 0 if it failed
@@ -436,48 +473,104 @@ int RunUI() {
             ImGui::EndChild(); // End NewMapCard
             break;
 
-                             // ==========================================
-                             // LOAD MAP
-                             // ==========================================
-        case AppState::LoadMap: {
+            // ==========================================
+            // LOAD MAP
+            // ==========================================
+            case AppState::LoadMap: {
             ImGui::Text("Load Map");
 
+            // --- 1. Fix Main Menu Button Visibility ---
             float backBtnWidth = ImGui::CalcTextSize("Main Menu").x + (ImGui::GetStyle().FramePadding.x * 2.0f);
             ImGui::SameLine(ImGui::GetWindowWidth() - backBtnWidth - 20.0f);
 
-            ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0, 0, 0, 0));
+            // Set text color: Dark Navy for Light Mode, White for Dark Mode
+            ImVec4 btnTextColor = (themeTab == 0) ? ImVec4(0.07f, 0.10f, 0.16f, 1.0f) : ImVec4(1.0f, 1.0f, 1.0f, 1.0f);
+            ImGui::PushStyleColor(ImGuiCol_Text, btnTextColor);
+            ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0, 0, 0, 0)); // Transparent background
+
             if (ImGui::Button("Main Menu")) currentState = AppState::MainMenu;
-            ImGui::PopStyleColor();
+
+            ImGui::PopStyleColor(2);
             ImGui::Spacing();
 
+            // Main Load Map Card
             ImGui::BeginChild("LoadMapCard", ImVec2(0, 0), true);
 
+            // --- Left Column (Upload Controls) ---
             ImGui::BeginChild("UploadSection", ImVec2(400, 0), false);
             ImGui::Text("Upload a saved map file");
             ImGui::Spacing();
 
+            static char selectedPath[512] = "No file chosen"; // Persistent buffer for path
             ImGui::SetNextItemWidth(250.0f);
-            ImGui::InputText("##filepath", (char*)"No file chosen", 256, ImGuiInputTextFlags_ReadOnly);
+            ImGui::InputText("##filepath", selectedPath, sizeof(selectedPath), ImGuiInputTextFlags_ReadOnly);
             ImGui::SameLine();
 
-            ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.07f, 0.10f, 0.16f, 1.0f));
-            ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.15f, 0.20f, 0.30f, 1.0f));
-            ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 1.0f, 1.0f, 1.0f));
-            if (ImGui::Button("Browse", ImVec2(100, 0))) { /* Open File Dialog */ }
+            // --- 2. Fix Browse Button Colors ---
+            // Use same logic as "New Map" button: Dark Navy in Light, Accent Blue in Dark
+            ImVec4 browseBtnColor = (themeTab == 0) ? ImVec4(0.07f, 0.10f, 0.16f, 1.0f) : ImVec4(0.40f, 0.50f, 0.70f, 1.00f);
+            ImVec4 browseBtnHover = (themeTab == 0) ? ImVec4(0.15f, 0.20f, 0.30f, 1.0f) : ImVec4(0.50f, 0.60f, 0.85f, 1.00f);
+
+            ImGui::PushStyleColor(ImGuiCol_Button, browseBtnColor);
+            ImGui::PushStyleColor(ImGuiCol_ButtonHovered, browseBtnHover);
+            ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 1.0f, 1.0f, 1.0f)); // Force white text
+
+            if (ImGui::Button("Browse", ImVec2(100, 0))) {
+                std::string path = OpenFileDialog(); // Call cross-platform helper
+                if (!path.empty()) {
+                    snprintf(selectedPath, sizeof(selectedPath), "%s", path.c_str());
+                    
+                    // Reload texture for preview
+                    if (previewTexture) glDeleteTextures(1, &previewTexture);
+                    previewTexture = LoadTextureFromFile(selectedPath);
+                    mapGenerated = (previewTexture != 0); 
+                }
+            }
             ImGui::PopStyleColor(3);
+            // --- New Continue Button Logic ---
+            // Only show the button if a map has been successfully loaded into previewTexture
+            if (mapGenerated && previewTexture) {
+                ImGui::Spacing(); ImGui::Spacing();
+                ImGui::Separator();
+                ImGui::Spacing();
 
-            ImGui::EndChild();
+                // Use the primary action colors: Dark Navy for Light Mode, Accent Blue for Dark Mode
+                ImVec4 contColor = (themeTab == 0) ? ImVec4(0.07f, 0.10f, 0.16f, 1.0f) : ImVec4(0.40f, 0.50f, 0.70f, 1.00f);
+                ImVec4 contHover = (themeTab == 0) ? ImVec4(0.15f, 0.20f, 0.30f, 1.0f) : ImVec4(0.50f, 0.60f, 0.85f, 1.00f);
+
+                ImGui::PushStyleColor(ImGuiCol_Button, contColor);
+                ImGui::PushStyleColor(ImGuiCol_ButtonHovered, contHover);
+                ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 1.0f, 1.0f, 1.0f));
+
+                // Clicking this sets the app state to NewMap where the generation sliders are
+                if (ImGui::Button("Continue to Generator", ImVec2(350, 40))) {
+                    currentState = AppState::NewMap; 
+                }
+                ImGui::PopStyleColor(3);
+                
+                ImGui::TextWrapped("Click above to use these settings in the live generator.");
+            }
+
+            ImGui::EndChild(); // End UploadSection
             ImGui::SameLine();
 
+            // --- Right Column (Preview Area) ---
             ImGui::BeginChild("PreviewSection", ImVec2(0, 0), true);
-            const char* prevText = "Loaded map preview (placeholder)";
-            ImVec2 textSize = ImGui::CalcTextSize(prevText);
             ImVec2 avail = ImGui::GetContentRegionAvail();
-            ImGui::SetCursorPos(ImVec2((avail.x - textSize.x) * 0.5f, (avail.y - textSize.y) * 0.5f));
-            ImGui::TextColored(ImVec4(0.6f, 0.6f, 0.6f, 1.0f), prevText);
+
+            if (mapGenerated && previewTexture) {
+                float imgSize = std::min(avail.x, avail.y);
+                ImGui::SetCursorPos(ImVec2((avail.x - imgSize) * 0.5f, (avail.y - imgSize) * 0.5f));
+                ImGui::Image((ImTextureID)(intptr_t)previewTexture, ImVec2(imgSize, imgSize));
+            } else {
+                const char* prevText = "Loaded map preview";
+                ImVec2 textSize = ImGui::CalcTextSize(prevText);
+                ImGui::SetCursorPos(ImVec2((avail.x - textSize.x) * 0.5f, (avail.y - textSize.y) * 0.5f));
+                ImGui::TextColored(ImVec4(0.6f, 0.6f, 0.6f, 1.0f), prevText);
+            }
             ImGui::EndChild();
 
-            ImGui::EndChild();
+            ImGui::EndChild(); // End LoadMapCard
             break;
         }
 
