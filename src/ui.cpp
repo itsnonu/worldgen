@@ -164,6 +164,13 @@ int RunUI() {
     // 1. Initialize GLFW & Window
     if (!glfwInit()) return -1;
 
+    #ifdef __APPLE__
+        glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+        glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
+        glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);  // Required for Mac
+        glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);            // Required for Mac
+    #endif
+
     GLFWwindow* window = glfwCreateWindow(1280, 720, "WorldGen", NULL, NULL);
     if (!window) {
         glfwTerminate();
@@ -178,14 +185,20 @@ int RunUI() {
     ImGuiIO& io = ImGui::GetIO(); (void)io;
     ImFontConfig fontConfig;
     fontConfig.GlyphOffset.y = -3.0f;
-    ImFont* mainFont = io.Fonts->AddFontFromFileTTF("../src/assets/Macondo-Regular.ttf", 22.0f, &fontConfig);
+    // Use if having issues: ImFont* mainFont = io.Fonts->AddFontFromFileTTF("../src/assets/Macondo-Regular.ttf", 22.0f, &fontConfig);
+    ImFont* mainFont = io.Fonts->AddFontFromFileTTF("assets/Macondo-Regular.ttf", 22.0f, &fontConfig);
     if (mainFont == NULL) {
         std::cout << "Warning: Could not load custom font. Using default." << std::endl;
     }
     SetupModernStyle();
     ImGui_ImplGlfw_InitForOpenGL(window, true);
-    ImGui_ImplOpenGL3_Init("#version 130");
 
+    // Use #version 150 on Mac
+    #ifdef __APPLE__
+        ImGui_ImplOpenGL3_Init("#version 150");
+    #else
+        ImGui_ImplOpenGL3_Init("#version 130");
+    #endif
     // 3. App State
     AppState currentState = AppState::MainMenu;
 
